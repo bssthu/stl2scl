@@ -72,14 +72,19 @@ class Converter:
         self.RLO = ''
         self.lines = lines
 
-        self.__toSCL()
+        self.__toSCL(self.lines)
 
         return self.sclLines
 
 
-    def __toSCL(self):
+    def __toSCL(self, lines):
         self.ops = []
-        for line in self.lines:
+        lineID = 0
+
+        while len(lines) > lineID:
+            line = lines[lineID]
+            lineID += 1
+
             if line.endswith(':'):
                 self.__addLine(line)
                 continue
@@ -100,9 +105,28 @@ class Converter:
                 #print('Unknown STL code: %s.' % line)
                 self.__addLine(line)
 
+            lines = self.__parseIf(lines, lineID)
+
 
     def __addLine(self, line):
         self.sclLines.append(line)
+
+
+    def __parseIf(self, lines, lineID):
+        if (len(self.sclLines) > 2 and self.sclLines[-1].startswith('END_IF')
+                and self.sclLines[-2].startswith('GOTO ') and self.sclLines[-3].startswith('IF NOT ')):
+            label = self.sclLines[-2][5:]
+            self.sclLines[-2:] = [] # remove END_IF & GOTO
+            self.sclLines[-1] = 'IF ' + self.sclLines[-1][7:]   # remove NOT
+
+            subLines = []
+            while lines[lineID] != label + ':':
+                subLines.append(lines[lineID])
+                lines[lineID:lineID + 1] = []
+
+            self.__toSCL(subLines)
+            self.__addLine('END_IF')
+        return lines
 
 
     def __dispatch(self, name, oper):
