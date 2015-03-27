@@ -116,16 +116,52 @@ class Converter:
         if (len(self.sclLines) > 2 and self.sclLines[-1].startswith('END_IF')
                 and self.sclLines[-2].startswith('GOTO ') and self.sclLines[-3].startswith('IF NOT ')):
             label = self.sclLines[-2][5:]
-            self.sclLines[-2:] = [] # remove END_IF & GOTO
-            self.sclLines[-1] = 'IF ' + self.sclLines[-1][7:]   # remove NOT
+            # check exists
+            exists = False
+            for line in lines[lineID:]:
+                if line == label + ':':
+                    exists = True
+                    break
+            if exists:
+                self.sclLines[-2:] = [] # remove END_IF & GOTO
+                self.sclLines[-1] = 'IF ' + self.sclLines[-1][7:]   # remove NOT
 
-            subLines = []
-            while lines[lineID] != label + ':':
-                subLines.append(lines[lineID])
-                lines[lineID:lineID + 1] = []
+                subLines = []
+                while lines[lineID] != label + ':':
+                    subLines.append(lines[lineID])
+                    lines[lineID:lineID + 1] = []
 
-            self.__toSCL(subLines)
-            self.__addLine('END_IF')
+                # if
+                self.__toSCL(subLines)
+                self.__addLine('END_IF')
+                lines = self.__parseElse(lines, lineID)
+
+        return lines
+
+
+    def __parseElse(self, lines, lineID):
+        if (len(self.sclLines) > 2 and self.sclLines[-1].startswith('END_IF')
+                and self.sclLines[-2].startswith('GOTO ')):
+            label = self.sclLines[-2][5:]
+            # check exists
+            exists = False
+            for line in lines[lineID:]:
+                if line == label + ':':
+                    exists = True
+                    break
+            if exists:
+                self.sclLines[-2:] = [] # remove END_IF & GOTO
+                self.__addLine('ELSE')
+
+                subLines = []
+                while lines[lineID] != label + ':':
+                    subLines.append(lines[lineID])
+                    lines[lineID:lineID + 1] = []
+
+                # else
+                self.__toSCL(subLines)
+                self.__addLine('END_IF')
+
         return lines
 
 
