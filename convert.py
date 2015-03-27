@@ -26,7 +26,39 @@ class Converter:
             'x' : 'x',
             'xn' : 'xn',
             'jcn' : 'jcn',
-            'ju' : 'ju'
+            'ju' : 'ju',
+            '+i' : 'plus',
+            '+d' : 'plus',
+            '+r' : 'plus',
+            '-i' : 'minus',
+            '-d' : 'minus',
+            '-r' : 'minus',
+            '*i' : 'multiplication',
+            '*d' : 'multiplication',
+            '*r' : 'multiplication',
+            '/i' : 'division',
+            '/d' : 'division',
+            '/r' : 'division',
+            'itd' : 'null',
+            'dtr' : 'null',
+            '>i' : '1g2',
+            '>d' : '1g2',
+            '>r' : '1g2',
+            '<i' : '1l2',
+            '<d' : '1l2',
+            '<r' : '1l2',
+            '=i' : '1e2',
+            '=d' : '1e2',
+            '=r' : '1e2',
+            '>=i' : '1ge2',
+            '>=d' : '1ge2',
+            '>=r' : '1ge2',
+            '<=i' : '1le2',
+            '<=d' : '1le2',
+            '<=r' : '1le2',
+            'negi' : 'neg',
+            'negd' : 'neg',
+            'negr' : 'neg',
         }
         self.logic_list = ['set', 'save', '=', 'not', 'a', 'an', 'o', 'on', 'x', 'xn', 'r', 's']
 
@@ -57,7 +89,7 @@ class Converter:
                 # check logic
                 if newOps in self.logic_list:
                     if (len(self.ops) > 0 and self.ops[-1] not in self.logic_list):
-                        self.RLO = ''
+                        self.RLO = '1'
                 # convert
                 self.__dispatch(newOps, stl[1][:-1])
                 # save ops
@@ -113,7 +145,10 @@ class Converter:
 
 
     def __stl_a(self, name, oper):
-        self.RLO = '%s AND (%s)' % (oper, self.RLO)
+        if self.RLO == '1':
+            self.RLO = str(oper)
+        else:
+            self.RLO = '%s AND (%s)' % (oper, self.RLO)
 
 
     def __stl_an(self, name, oper):
@@ -137,10 +172,50 @@ class Converter:
 
 
     def __stl_jcn(self, name, oper):
-        self.__addLine('IF %s THEN' % self.RLO)
+        self.__addLine('IF NOT (%s) THEN' % self.RLO)
         self.__addLine('    GOTO %s' % oper)
         self.__addLine('END_IF')
 
 
     def __stl_ju(self, name, oper):
         self.__addLine('GOTO %s' % oper)
+
+
+    def __stl_plus(self, name, oper):
+        self.ACCU1 = '(%s + %s)' % (self.ACCU1, self.ACCU2)
+
+
+    def __stl_minus(self, name, oper):
+        self.ACCU1 = '(%s - %s)' % (self.ACCU2, self.ACCU1)
+
+
+    def __stl_multiplication(self, name, oper):
+        self.ACCU1 = '(%s * %s)' % (self.ACCU1, self.ACCU2)
+
+
+    def __stl_division(self, name, oper):
+        self.ACCU1 = '(%s / %s)' % (self.ACCU2, self.ACCU1)
+
+
+    def __stl_1g2(self, name, oper):
+        self.RLO = '(%s > %s)' % (self.ACCU1, self.ACCU2)
+
+
+    def __stl_1l2(self, name, oper):
+        self.RLO = '(%s < %s)' % (self.ACCU1, self.ACCU2)
+
+
+    def __stl_1e2(self, name, oper):
+        self.RLO = '(%s == %s)' % (self.ACCU1, self.ACCU2)
+
+
+    def __stl_1ge2(self, name, oper):
+        self.RLO = '(%s >= %s)' % (self.ACCU1, self.ACCU2)
+
+
+    def __stl_1le2(self, name, oper):
+        self.RLO = '(%s <= %s)' % (self.ACCU1, self.ACCU2)
+
+
+    def __stl_neg(self, name, oper):
+        self.ACCU1 = '(-%s)' % self.ACCU1
