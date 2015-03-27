@@ -16,6 +16,8 @@ class STL2SCL:
     def __init__(self):
         self.stl_filename = './in.txt'
         self.scl_filename = './out.scl'
+        self.keep_stl = False
+        self.show_label = False
 
 
     def convert(self, stl_filename):
@@ -29,6 +31,7 @@ class STL2SCL:
         print('+Please wait...')
         self.__formatSTL()
         self.__toSCL()
+        self.__checkLabel()
         self.__formatSCL()
         print('+Saving SCL to %s' % self.scl_filename)
         self.__save()
@@ -72,8 +75,30 @@ class STL2SCL:
 
 
     def __toSCL(self):
-        converter = Converter()
+        converter = Converter(keep_stl = self.keep_stl)
         self.lines = converter.convert(self.lines)
+
+
+    def __checkLabel(self):
+        usedLabels = []
+        for line in self.lines:
+            if line.startswith('GOTO '):
+                usedLabels.append(line[5:])
+
+        newLines = []
+        for line in self.lines:
+            if line.endswith(':'):
+                label = line[:-1]
+                if label in usedLabels:
+                    newLines.append(line)
+                elif self.keep_stl:
+                    newLines.append('// %s' % line)
+                elif self.show_label:
+                    newLines.append(line)
+            else:
+                newLines.append(line)
+
+        self.lines = newLines
 
 
     def __formatSCL(self):
@@ -109,7 +134,7 @@ class STL2SCL:
     def parseOpts(self, argv):
         try:
             opts, args = getopt.getopt(argv[1:], 'hi:o:',
-                    ['help', 'input=', 'output='])
+                    ['help', 'input=', 'output=', 'keep-stl', 'show-label'])
         except (getopt.GetoptError, err):
             print(str(err))
             Usage()
@@ -126,6 +151,10 @@ class STL2SCL:
                 self.stl_filename = a
             elif o in ('-o', '--output'):
                 self.scl_filename = a
+            elif o in ('--keep-stl'):
+                self.keep_stl = True
+            elif o in ('--show-label'):
+                self.show_label = True
 
 
 
@@ -134,6 +163,8 @@ def Usage():
     print('usage:')
     print('-i, --input: input stl file name')
     print('-o, --output: output scl file name')
+    print('--keep-stl: keep stl code as comment')
+    print('--show-label: show all labels')
     print('')
     print('example:')
     print('./stl2scl.py -i in.stl -o out.scl')

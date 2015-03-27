@@ -8,7 +8,8 @@
 # 
 
 class Converter:
-    def __init__(self):
+    def __init__(self, keep_stl = False):
+        self.keep_stl = keep_stl
         self.method_list = {
             'save' : 'null',
             'be' : 'null',
@@ -88,6 +89,10 @@ class Converter:
             if line.endswith(':'):
                 self.__addLine(line)
                 continue
+
+            if self.keep_stl:
+                self.__addLine('// %s' % line)
+
             stl = line.split()
             stl[1:] = [' '.join(stl[1:])]
 
