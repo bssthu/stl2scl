@@ -29,6 +29,7 @@ class STL2SCL:
         print('+Please wait...')
         self.__formatSTL()
         self.__toSCL()
+        self.__formatSCL()
         print('+Saving SCL to %s' % self.scl_filename)
         self.__save()
 
@@ -73,6 +74,36 @@ class STL2SCL:
     def __toSCL(self):
         converter = Converter()
         self.lines = converter.convert(self.lines)
+
+
+    def __formatSCL(self):
+        newLines = []
+        nestedLevel = 0
+        indent = '    '
+
+        for line in self.lines:
+            if line.endswith(':'):
+                newLines.append('')
+
+            if line.startswith('ELSE'):
+                newLines.append(indent * (nestedLevel-1) + line)
+                continue
+            elif line.startswith('IF '):
+                newLines.append(indent * nestedLevel + line)
+                nestedLevel += 1
+            elif line.startswith('FOR '):
+                newLines.append(indent * nestedLevel + line)
+                nestedLevel += 1
+            elif line.startswith('END_IF'):
+                nestedLevel -= 1
+                newLines.append(indent * nestedLevel + line)
+            elif line.startswith('END_FOR'):
+                nestedLevel -= 1
+                newLines.append(indent * nestedLevel + line)
+            else:
+                newLines.append(indent * nestedLevel + line)
+
+        self.lines = newLines
 
 
     def parseOpts(self, argv):

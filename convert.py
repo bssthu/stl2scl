@@ -41,6 +41,7 @@ class Converter:
             '/r' : 'division',
             'itd' : 'null',
             'dtr' : 'null',
+            'rnd' : 'null',
             '>i' : '1g2',
             '>d' : '1g2',
             '>r' : '1g2',
@@ -174,7 +175,7 @@ class Converter:
 
     def __stl_jcn(self, name, oper):
         self.__addLine('IF NOT (%s) THEN' % self.RLO)
-        self.__addLine('    GOTO %s' % oper)
+        self.__addLine('GOTO %s' % oper)
         self.__addLine('END_IF')
 
 
