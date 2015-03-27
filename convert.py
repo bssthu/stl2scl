@@ -60,7 +60,7 @@ class Converter:
             'negd' : 'neg',
             'negr' : 'neg',
         }
-        self.logic_list = ['set', 'save', '=', 'not', 'a', 'an', 'o', 'on', 'x', 'xn', 'r', 's']
+        self.logic_list = ['set', 'save', 'not', 'a', 'an', 'o', 'on', 'x', 'xn']
 
 
     def convert(self, lines):
