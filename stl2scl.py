@@ -9,11 +9,14 @@
 
 import sys
 import getopt
+from convert import Converter
 
-class Converter:
+
+class STL2SCL:
     def __init__(self):
         self.stl_filename = './in.txt'
         self.scl_filename = './out.scl'
+
 
     def convert(self, stl_filename):
         self.stl_filename = stl_filename
@@ -25,6 +28,7 @@ class Converter:
         self.__load()
         print('+Please wait...')
         self.__formatSTL()
+        self.__toSCL()
         print('+Saving SCL to %s' % self.scl_filename)
         self.__save()
 
@@ -66,6 +70,11 @@ class Converter:
         self.lines = newLines
 
 
+    def __toSCL(self):
+        converter = Converter()
+        self.lines = converter.convert(self.lines)
+
+
     def parseOpts(self, argv):
         try:
             opts, args = getopt.getopt(argv[1:], 'hi:o:',
@@ -90,7 +99,8 @@ class Converter:
 
 
 def Usage():
-    print('stl2scl.py usage:')
+    print('stl2scl.py @ https://github.com/bssthu/stl2scl')
+    print('usage:')
     print('-i, --input: input stl file name')
     print('-o, --output: output scl file name')
     print('')
@@ -100,7 +110,7 @@ def Usage():
 
 
 if __name__ == '__main__':
-    converter = Converter()
-    converter.parseOpts(sys.argv)
+    stl2scl = STL2SCL()
+    stl2scl.parseOpts(sys.argv)
 
-    converter.convert()
+    stl2scl.convert()
