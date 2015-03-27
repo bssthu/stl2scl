@@ -61,6 +61,7 @@ class Converter:
             'negr' : 'neg',
         }
         self.logic_list = ['set', 'save', 'not', 'a', 'an', 'o', 'on', 'x', 'xn']
+        self.logic_change = ['=', 's', 'r']
 
 
     def convert(self, lines):
@@ -87,7 +88,7 @@ class Converter:
             newOps = stl[0].lower()
             if newOps in self.method_list:
                 # check logic
-                if newOps in self.logic_list:
+                if (newOps in self.logic_list or newOps in self.logic_change):
                     if (len(self.ops) > 0 and self.ops[-1] not in self.logic_list):
                         self.RLO = '1'
                 # convert
