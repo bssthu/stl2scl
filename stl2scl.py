@@ -43,24 +43,33 @@ class Converter:
 
     def __formatSTL(self):
         newLines = []
+
         for line in self.lines:
             line = line.strip()
-            line = line.strip(';')              # end with ;
+            if line == '':
+                continue
+
+            line = line.strip(';')      # end with ;
             sp = line.split(':')
-            if len(sp) > 1:      # with label
-                newLines.append(sp[0])
+            if len(sp) > 1:             # begin with label
+                newLines.append(sp[0] + ':')
                 line = ' '.join(sp[1:])
+            line = line.strip()
+            if line == '':
+                continue
+
             sp = line.split()
             sp1 = ' '.join(sp[1:])
             line = sp[0] + ' ' * max(8 - len(sp[0]), 1) + sp1 + ';'
             newLines.append(line)
+
         self.lines = newLines
 
 
     def parseOpts(self, argv):
         try:
-            opts, args = getopt.getopt(argv[1:], 'hi:',
-                    ['help', 'input='])
+            opts, args = getopt.getopt(argv[1:], 'hi:o:',
+                    ['help', 'input=', 'output='])
         except (getopt.GetoptError, err):
             print(str(err))
             Usage()
