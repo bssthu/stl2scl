@@ -113,16 +113,11 @@ class STL2SCL:
             if line.startswith('ELSE'):
                 newLines.append(indent * (nestedLevel-1) + line)
                 continue
-            elif line.startswith('IF '):
+            elif (line.startswith('IF ') or line.startswith('FOR ') or line.startswith('VAR_INPUT')
+                    or line.startswith('VAR_OUTPUT') or line.startswith('VAR_TEMP')):
                 newLines.append(indent * nestedLevel + line)
                 nestedLevel += 1
-            elif line.startswith('FOR '):
-                newLines.append(indent * nestedLevel + line)
-                nestedLevel += 1
-            elif line.startswith('END_IF'):
-                nestedLevel -= 1
-                newLines.append(indent * nestedLevel + line)
-            elif line.startswith('END_FOR'):
+            elif (line.startswith('END_IF') or line.startswith('END_FOR') or line.startswith('END_VAR')):
                 nestedLevel -= 1
                 newLines.append(indent * nestedLevel + line)
             else:
